@@ -17,6 +17,7 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Snackbar,
 } from "@mui/material";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import Visibility from "@mui/icons-material/Visibility";
@@ -30,20 +31,28 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [role, setRole] = useState("user");
-  const [loading, setLoading] = useState(false); // New state for loading
+  const [loading, setLoading] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading
-    setError(""); // Clear previous errors
+    setLoading(true);
+    setError("");
 
     try {
       await registerUser(name, email, password, role);
       navigate("/dashboard");
     } catch (err) {
-      setError("Error during registration. Please try again.");
+      if (err.response && err.response.status === 400) {
+        // Show snackbar when email already exists
+        setSnackbarMessage("User already exists with this email.");
+        setOpenSnackbar(true);
+      } else {
+        setError("Error during registration. Please try again.");
+      }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -159,13 +168,25 @@ const RegisterPage = () => {
               fullWidth
               variant="contained"
               sx={{ mt: 2, mb: 2, py: 1.5 }}
-              disabled={loading} // Disable button when loading
+              disabled={loading}
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : "Add User"}
             </Button>
           </Box>
         </Paper>
       </Box>
+
+      {/* Snackbar for Duplicate Email Error */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
