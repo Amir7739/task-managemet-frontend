@@ -13,7 +13,8 @@ import {
   Avatar,
   Alert,
   IconButton,
-  InputAdornment
+  InputAdornment,
+  CircularProgress
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
@@ -26,15 +27,20 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
       const data = await loginUser(email, password);
       dispatch(loginSuccess(data));
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid credentials. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,8 +129,9 @@ const LoginPage = () => {
               fullWidth
               variant="contained"
               sx={{ mt: 2, mb: 2, py: 1.5 }}
+              disabled={loading}
             >
-              Sign In
+              {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Sign In'}
             </Button>
           </Box>
         </Paper>

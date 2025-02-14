@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import { registerUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,6 +16,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import Visibility from "@mui/icons-material/Visibility";
@@ -30,14 +30,20 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [role, setRole] = useState("user");
+  const [loading, setLoading] = useState(false); // New state for loading
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loading
+    setError(""); // Clear previous errors
+
     try {
       await registerUser(name, email, password, role);
       navigate("/dashboard");
     } catch (err) {
       setError("Error during registration. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -79,11 +85,7 @@ const RegisterPage = () => {
             </Alert>
           )}
 
-          <Box
-            component="form"
-            onSubmit={handleRegister}
-            sx={{ width: "100%" }}
-          >
+          <Box component="form" onSubmit={handleRegister} sx={{ width: "100%" }}>
             <TextField
               margin="normal"
               required
@@ -157,8 +159,9 @@ const RegisterPage = () => {
               fullWidth
               variant="contained"
               sx={{ mt: 2, mb: 2, py: 1.5 }}
+              disabled={loading} // Disable button when loading
             >
-              Add User
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Add User"}
             </Button>
           </Box>
         </Paper>
